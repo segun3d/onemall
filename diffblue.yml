@@ -1,0 +1,271 @@
+buildCmd: mvn -e -X -Dmaven.test.skip=true compile
+testCmd: true
+lineLength: 4096
+skipVerification: true
+cbmcArguments:
+  # Do not generate coverage comments on generated tests.
+  java-generate-no-comments: true
+phases:
+  -
+  #Phase 0 PRETTY AND SIMPLE - Simple models, quick cover, pretty Tests, Do Not Test Private Method Directly
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [ private ]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # Instrument the file as opposed to the function only
+      cover-only: file
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+  -
+  #Phase 1 PRETTY AND COMPLEX - Standard models, longer run time, pretty tests, Do Not Test Private Method Directly
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 2
+      # Do not test any methods that have the specified access level.
+      do-not-test-methods-with-access: [ private ]
+      # Instrument the entry point function only.
+      cover-function-only: false
+      # instrument the file as opposed to the function only
+      cover-only: file
+  -
+  #Phase 2 Simple and Private Directly
+    timeout: 180
+    cbmcArguments:
+      # Use simple models containers (ArrayList, HashMap, HashSet,...) will have a maximum size of one.
+      classpath: '/tools/cbmc/models-simple-overlay.jar:/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 1500
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: true
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 10
+      # Bound the length of input strings.
+      max-nondet-string-length: 10
+      # Add constraint that strings are printable
+      string-printable: true
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 1
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+      # If the logs contain output of the following then proceed to phase X
+    nextPhase:
+      # If the function is not analysable then do not pass onto the next phase
+      not_analyzed: null
+  -
+  #Phase 3 Complex and Private Directly
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: 3000
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 3
+      # Set string input value  
+      string-input-value: ["foo", "Bar", "BAZ", "1234", "a,b,c", "1", "2", "3", "a/b/c", "a'b'c"]
+  -
+  #Phase 4 EXCEPTIONS
+    timeout: 180
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 30
+      # Bound the length of input strings.
+      max-nondet-string-length: 30
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: true
+      # Set an upper bound on loop unwinding.
+  -
+    #PHASE 5 Big numbers and less contraints on inputs 
+    timeout: 300
+    cbmcArguments:
+      # Use the standard models library.
+      classpath: '/tools/cbmc/models.jar:.'
+      # Set a limit on the number of instructions that can be generated as part of a test trace.
+      depth: false
+      # never initialize reference-typed parameter to the entry point with null
+      java-assume-inputs-non-null: false
+      # Constrain the size of arrays created in the analyzed code.
+      java-max-vla-length: 10000
+      # Maximum allowed length for an array passed as test input.
+      max-nondet-array-length: 100
+      # Bound the length of input strings.
+      max-nondet-string-length: 100
+      # Add constraint that strings are printable
+      string-printable: false
+      # Make implicit runtime exceptions explicit.
+      throw-runtime-exceptions: false
+      # Set an upper bound on loop unwinding.
+      unwind: 6
+
+units:
+# Target TGF: 655.5
+#  >methods=47
+#  >complexity=1395
+#  >construction=8.25
+#  >dependency=22.5
+ - target:
+   - dir: order/order-service-impl/target/classes
+     file: cn/iocoder/mall/order/biz/dataobject/OrderItemDO.class
+     sourceDir: order/order-service-impl/src/main/java
+     sourceFile: cn/iocoder/mall/order/biz/dataobject/OrderItemDO.java
+   - dir: common/common-framework/target/classes
+     file: cn/iocoder/common/framework/dataobject/DeletableDO.class
+     sourceDir: common/common-framework/src/main/java
+     sourceFile: cn/iocoder/common/framework/dataobject/DeletableDO.java
+# Target TGF: 593.785714286
+#  >methods=43
+#  >complexity=1267
+#  >construction=7.53571428571
+#  >dependency=20.5
+ - target:
+   - dir: order/order-service-api/target/classes
+     file: cn/iocoder/mall/order/api/bo/OrderInfoBO.class
+     sourceDir: order/order-service-api/src/main/java
+     sourceFile: cn/iocoder/mall/order/api/bo/OrderInfoBO.java
+# Target TGF: 625.5
+#  >methods=45
+#  >complexity=1331
+#  >construction=8.0
+#  >dependency=21.5
+ - target:
+   - dir: promotion/promotion-service-api/target/classes
+     file: cn/iocoder/mall/promotion/api/bo/CouponCardDetailBO.class
+     sourceDir: promotion/promotion-service-api/src/main/java
+     sourceFile: cn/iocoder/mall/promotion/api/bo/CouponCardDetailBO.java
+# Target TGF: 595.5
+#  >methods=43
+#  >complexity=1267
+#  >construction=7.75
+#  >dependency=20.5
+ - target:
+   - dir: system/system-service-impl/target/classes
+     file: cn/iocoder/mall/admin/dataobject/ExceptionLogDO.class
+     sourceDir: system/system-service-impl/src/main/java
+     sourceFile: cn/iocoder/mall/admin/dataobject/ExceptionLogDO.java
+   - dir: common/common-framework/target/classes
+     file: cn/iocoder/common/framework/dataobject/BaseDO.class
+     sourceDir: common/common-framework/src/main/java
+     sourceFile: cn/iocoder/common/framework/dataobject/BaseDO.java
+# Target TGF: 685.5
+#  >methods=49
+#  >complexity=1459
+#  >construction=8.5
+#  >dependency=23.5
+ - target:
+   - dir: promotion/promotion-service-api/target/classes
+     file: cn/iocoder/mall/promotion/api/bo/CouponTemplateBO.class
+     sourceDir: promotion/promotion-service-api/src/main/java
+     sourceFile: cn/iocoder/mall/promotion/api/bo/CouponTemplateBO.java
+# Target TGF: 685.5
+#  >methods=49
+#  >complexity=1459
+#  >construction=8.5
+#  >dependency=23.5
+ - target:
+   - dir: promotion/promotion-application/target/classes
+     file: cn/iocoder/mall/promotion/application/vo/admins/AdminsCouponTemplateVO.class
+     sourceDir: promotion/promotion-application/src/main/java
+     sourceFile: cn/iocoder/mall/promotion/application/vo/admins/AdminsCouponTemplateVO.java
+# Target TGF: 715.5
+#  >methods=51
+#  >complexity=1523
+#  >construction=8.75
+#  >dependency=24.5
+ - target:
+   - dir: order/order-service-api/target/classes
+     file: cn/iocoder/mall/order/api/bo/OrderItemBO.class
+     sourceDir: order/order-service-api/src/main/java
+     sourceFile: cn/iocoder/mall/order/api/bo/OrderItemBO.java
+# Target TGF: 778.5
+#  >methods=10
+#  >complexity=175
+#  >construction=81.0
+#  >dependency=4.83333333333
+ - target:
+   - dir: common/common-framework/target/classes
+     file: cn/iocoder/common/framework/util/DateUtil.class
+     sourceDir: common/common-framework/src/main/java
+     sourceFile: cn/iocoder/common/framework/util/DateUtil.java
+# Target TGF: 685.5
+#  >methods=49
+#  >complexity=1459
+#  >construction=8.5
+#  >dependency=23.5
+ - target:
+   - dir: promotion/promotion-service-impl/target/classes
+     file: cn/iocoder/mall/promotion/biz/dataobject/CouponTemplateDO.class
+     sourceDir: promotion/promotion-service-impl/src/main/java
+     sourceFile: cn/iocoder/mall/promotion/biz/dataobject/CouponTemplateDO.java
+   - dir: common/common-framework/target/classes
+     file: cn/iocoder/common/framework/dataobject/BaseDO.class
+     sourceDir: common/common-framework/src/main/java
+     sourceFile: cn/iocoder/common/framework/dataobject/BaseDO.java
+# Target TGF: 565.5
+#  >methods=42
+#  >complexity=1203
+#  >construction=7.5
+#  >dependency=19.5
+ - target:
+   - dir: system/system-service-api/target/classes
+     file: cn/iocoder/mall/admin/api/dto/ExceptionLogAddDTO.class
+     sourceDir: system/system-service-api/src/main/java
+     sourceFile: cn/iocoder/mall/admin/api/dto/ExceptionLogAddDTO.java
